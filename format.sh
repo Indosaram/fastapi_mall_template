@@ -1,1 +1,1 @@
-pipenv run isort . && black .
+pipenv run isort . && black -l 80 -t py38 --skip-string-normalization .
