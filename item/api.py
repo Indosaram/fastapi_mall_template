@@ -19,7 +19,7 @@ router = APIRouter(prefix="/item", tags=["item"])
 async def all_items(
     limit: int = 100,
     category: Optional[str] = None,
-    # current_user: TokenData = Depends(get_current_user),
+    current_user: TokenData = Depends(get_current_user),
 ) -> dict:
     collection = db["items"]
 
@@ -37,8 +37,7 @@ async def all_items(
 
 @router.get("/{id}", response_model=Item)
 async def item(
-    id: str,
-    # current_user: TokenData = Depends(get_current_user)
+    id: str, current_user: TokenData = Depends(get_current_user)
 ) -> dict:
     collection = db["items"]
     item = await collection.find_one({"_id": ObjectId(id)})
@@ -98,9 +97,10 @@ async def update(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No item is found by provided id: {id}",
         )
-    item["id"] = str(item["_id"])
 
     item = {**item, **request}
-    await collection.find_one_and_update({"_id": item["_id"]}, {"$set": item})
+    updated_item = await collection.find_one_and_update(
+        {"_id": item["_id"]}, {"$set": item}
+    )
 
-    return {"msg": f"An item of id {id} is updated."}
+    return updated_item

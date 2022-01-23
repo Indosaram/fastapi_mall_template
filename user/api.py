@@ -88,4 +88,4 @@ async def update(id: str, response: Response, request: User):
             detail=f"No user is found by provided id: {id}",
         )
 
-    return {"msg": f"An user of id {id} is updated."}
+    return updated_user
