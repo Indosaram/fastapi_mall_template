@@ -5,7 +5,7 @@ from starlette import status
 
 from auth.token import verify_token
 
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="login")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_current_user(token: str = Depends(OAUTH2_SCHEME)):

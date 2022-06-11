@@ -19,7 +19,6 @@ router = APIRouter(prefix="/item", tags=["item"])
 async def all_items(
     limit: int = 100,
     category: Optional[str] = None,
-    current_user: TokenData = Depends(get_current_user),
 ) -> dict:
     collection = db["items"]
 
@@ -36,9 +35,7 @@ async def all_items(
 
 
 @router.get("/{id}", response_model=Item)
-async def item(
-    id: str, current_user: TokenData = Depends(get_current_user)
-) -> dict:
+async def item(id: str) -> dict:
     collection = db["items"]
     item = await collection.find_one({"_id": ObjectId(id)})
 
