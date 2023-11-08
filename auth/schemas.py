@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -8,7 +6,7 @@ class Login(BaseModel):
     password: str
 
     class Config:
-        schema_extra = {"example": {"name": "indo", "password": "projex"}}
+        json_schema_extra = {"example": {"name": "indo", "password": "projex"}}
 
 
 class Token(BaseModel):
@@ -17,4 +15,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    name: Optional[str] = None
+    name: str | None = None

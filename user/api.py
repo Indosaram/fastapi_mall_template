@@ -4,7 +4,7 @@ from fastapi.exceptions import HTTPException
 from starlette.responses import Response
 
 from database import client
-from user.schemas import User, UserList
+from user.schemas import User
 from utils.hasher import Hasher
 from utils.utils import validate_id
 
@@ -15,10 +15,9 @@ router = APIRouter(prefix="/user", tags=["user"])
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=User,
     tags=["user"],
 )
-async def create(request: User):
+async def create(request: User) -> User:
     request.password = Hasher.hash(request.password)
     collection = db["user"]
     new_user = await collection.insert_one(jsonable_encoder(request))
@@ -29,8 +28,8 @@ async def create(request: User):
     return created_user
 
 
-@router.get("/", response_model=UserList)
-async def index(limit: int = 100) -> dict:
+@router.get("/")
+async def index(limit: int = 100) -> list[User]:
     collection = db["user"]
     cursor = collection.find()
 
@@ -42,8 +41,8 @@ async def index(limit: int = 100) -> dict:
     return {"data": documents}
 
 
-@router.get("/{id}", response_model=User)
-async def show(id: str, response: Response):
+@router.get("/{id}")
+async def show(id: str, response: Response) -> User:
     object_id = validate_id(id, response)
 
     collection = db["user"]
@@ -59,7 +58,7 @@ async def show(id: str, response: Response):
 
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def destroy(id: str, response: Response):
+async def destroy(id: str, response: Response) -> dict:
     object_id = validate_id(id, response)
     collection = db["user"]
     delete_result = await collection.delete_one({"_id": object_id})
@@ -74,7 +73,7 @@ async def destroy(id: str, response: Response):
 
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
-async def update(id: str, response: Response, request: User):
+async def update(id: str, response: Response, request: User) -> User:
     object_id = validate_id(id, response)
 
     collection = db["user"]

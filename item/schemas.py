@@ -1,17 +1,15 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class Item(BaseModel):
-    id: Optional[str]
+    id: str | None = None
     title: str
     price: int
-    thumbnail: Optional[str]
+    thumbnail: str | None = None
     category: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": "6182a806347ed04e12d4b2a2",
                 "title": "iPhone 13 Pro Max",

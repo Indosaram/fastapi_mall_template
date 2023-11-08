@@ -1,10 +1,9 @@
-from typing import Dict, List, Optional
-
 from bson.objectid import ObjectId
 from fastapi import APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
+from pymongo import ReturnDocument
 
 from auth.oauth2 import get_current_user
 from auth.schemas import TokenData
@@ -15,11 +14,11 @@ db = client.mall_template
 router = APIRouter(prefix="/item", tags=["item"])
 
 
-@router.get("/", response_model=Dict[str, List[Item]])
+@router.get("/")
 async def all_items(
     limit: int = 100,
-    category: Optional[str] = None,
-) -> dict:
+    category: str | None = None,
+) -> dict[str, list[Item]]:
     collection = db["items"]
 
     if category is not None:
@@ -34,8 +33,8 @@ async def all_items(
     return {"data": documents}
 
 
-@router.get("/{id}", response_model=Item)
-async def item(id: str) -> dict:
+@router.get("/{id}")
+async def item(id: str) -> Item:
     collection = db["items"]
     item = await collection.find_one({"_id": ObjectId(id)})
 
@@ -51,17 +50,13 @@ async def item(id: str) -> dict:
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=Item,
 )
 async def create(
     request: Item, current_user: TokenData = Depends(get_current_user)
-) -> dict:
-
+) -> Item:
     collection = db["items"]
     new_article = await collection.insert_one(jsonable_encoder(request))
-    created_article = await collection.find_one(
-        {"_id": new_article.inserted_id}
-    )
+    created_article = await collection.find_one({"_id": new_article.inserted_id})
 
     created_article["id"] = str(created_article["_id"])
 
@@ -83,9 +78,7 @@ async def destroy(id: str, current_user: TokenData = Depends(get_current_user)):
 
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
-async def update(
-    id: str, request: dict, current_user: TokenData = Depends(get_current_user)
-):
+async def update(id: str, request: dict) -> Item:
     collection = db["items"]
     item = await collection.find_one({"_id": ObjectId(id)})
 
@@ -95,9 +88,9 @@ async def update(
             detail=f"No item is found by provided id: {id}",
         )
 
-    item = {**item, **request}
-    updated_item = await collection.find_one_and_update(
-        {"_id": item["_id"]}, {"$set": item}
+    updated = await collection.find_one_and_update(
+        {"_id": item["_id"]}, {"$set": request}, return_document=ReturnDocument.AFTER
     )
+    updated["id"] = str(updated["_id"])
 
-    return updated_item
+    return updated

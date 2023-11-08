@@ -1,6 +1,5 @@
-import os
 import datetime
-from typing import Optional
+import os
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
@@ -17,9 +16,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def create_access_token(
-    data: dict, expires_delta: Optional[datetime.timedelta] = None
-):
+def create_access_token(data: dict, expires_delta: datetime.timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.datetime.utcnow() + expires_delta
