@@ -1,11 +1,15 @@
 import os
 
 from dotenv import load_dotenv
-from motor.motor_asyncio import AsyncIOMotorClient
+import psycopg
 
-"""
-Start mongodb by `brew services start mongodb-community@5.0`"""
 
 load_dotenv()
 
-client = AsyncIOMotorClient(os.environ["DB_URI"])
+
+async def get_conn():
+    with psycopg.connect(
+        conninfo=os.environ["POSTGRES_INFO"],
+    ) as conn:
+        yield conn
+        conn.close()

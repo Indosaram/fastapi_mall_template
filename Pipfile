@@ -7,12 +7,12 @@ name = "pypi"
 fastapi = "*"
 pymongo = "*"
 python-dotenv = "*"
-motor = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 passlib = "*"
 bcrypt = "*"
 python-jose = "*"
 python-multipart = "*"
+psycopg = {extras = ["binary", "pool"], version = "*"}
 
 [dev-packages]
 black = "*"

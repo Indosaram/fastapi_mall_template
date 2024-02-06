@@ -1,16 +1,14 @@
-from bson.objectid import ObjectId
 from fastapi import APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
-from pymongo import ReturnDocument
+
 
 from auth.oauth2 import get_current_user
 from auth.schemas import TokenData
-from database import client
+from database import get_conn
 from item.schemas import Item
 
-db = client.mall_template
 router = APIRouter(prefix="/item", tags=["item"])
 
 
@@ -18,19 +16,11 @@ router = APIRouter(prefix="/item", tags=["item"])
 async def all_items(
     limit: int = 100,
     category: str | None = None,
+    conn: get_conn = Depends(),
 ) -> dict[str, list[Item]]:
-    collection = db["items"]
+    items = conn.execute("SELECT * FROM items;")
 
-    if category is not None:
-        cursor = collection.find({"category": category})
-    else:
-        cursor = collection.find()
-    documents = []
-    for item in await cursor.to_list(length=limit):
-        item["id"] = str(item["_id"])
-        documents.append(item)
-
-    return {"data": documents}
+    return {"data": items}
 
 
 @router.get("/{id}")
